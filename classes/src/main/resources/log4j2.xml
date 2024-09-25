@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %logger{36}.%msg%n" direct="true" />
+        </Console>
+
+        <File name="FileAppender" fileName="logs/universal-file-replacer-logs/file_replace.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %logger{36}.%msg%n" direct="true" />
+        </File>
+
+
+    </Appenders>
+
+    <Loggers>
+        <Root level="trace">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="FileAppender" />
+        </Root>
+
+    </Loggers>
+
+
+
+
+</Configuration>
+
+
+
+
