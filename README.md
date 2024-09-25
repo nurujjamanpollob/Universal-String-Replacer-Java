@@ -37,20 +37,17 @@ To replace a string in all/selected files under a directory, use this class:
 
 Code example:
 
-`ReplaceStringInFiles replaceStringInFiles = new ReplaceStringInFiles(
-"src/main/resources/test-files",
-"me",
-"I've Replaced Already!"
-);
-
+      
+                                
         try {
-            replaceStringInFiles.replaceStringInFiles();
+                ReplaceStringInFiles replaceStringInFiles = new ReplaceStringInFiles("src/main/resources/test-files", "me", "I Have Replaced Already!");
+                replaceStringInFiles.replaceStringInFiles();
         } catch (TextReplacerError e) {
             
             // handle the exception
             e.printStackTrace();
             
-        }`
+        }
 
 To replace a string in a single file, use this class:
 
@@ -58,14 +55,14 @@ To replace a string in a single file, use this class:
 
 Code example:
 
-`ReplaceStringInAFile replaceStringInAFile = new ReplaceStringInAFile(file, "me", "I've Replaced Already!");
-String replacedFilePath = null;
-try {
-replacedFilePath = replaceStringInAFile.replaceString();
-} catch (TextReplacerError e) {
-// handle the exception
-e.printStackTrace();
-}`
+
+        try {
+                ReplaceStringInAFile replaceStringInAFile = new ReplaceStringInAFile(file, "me", "I've Replaced Already!");
+                String replacedFilePath = replaceStringInAFile.replaceString();
+        } catch (TextReplacerError e) {
+                // handle the exception
+                e.printStackTrace();
+        }
 
 # Constructors
 
