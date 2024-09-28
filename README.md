@@ -64,9 +64,55 @@ Code example:
                 e.printStackTrace();
         }
 
+# Performance
+
+This library was tested with a 70MB+ text file with a 10MB buffer size,
+and it took less than 1 second to replace the string in the file.
+
+By default, the buffer size is 1024 bytes, you can set the buffer size as you want.
+Specially, in the case of processing large files, you can set the buffer size to a higher value,
+to make sure your file is processed correctly and faster.
+
 # Constructors
 
-It Will be updated soon.
+`**Class javadev.stringcollections.textreplacor.ReplaceStringInFiles**`
+
+<ul>
+<li>public ReplaceStringInFiles(String[] ignoreFileExtensions, String initialDirectoryPath, String oldString, String newString) - 
+Initialize the String file replacer with specific file extensions ignore option.
+For example, exclude .css files while bulk replace text files.</li> <br>
+
+<li>public ReplaceStringInFiles(String[] ignoreFileExtensions, String initialDirectoryPath, String oldString, String newString, int bufferSize) - 
+Initialize the String file replacer with specific file extensions ignore option with file read and write buffer size.
+For example, exclude .css files while bulk replace text files.</li> <br>
+
+<li>public ReplaceStringInFiles(String initialDirectoryPath, String oldString, String newString, String[] onlyFileExtensions) - 
+Initialize the String file replacer with process only specific types of text file extensions. 
+For example, only replace .css files while bulk replace text files.
+File extension other than.css files will be ignored.</li> <br>
+
+<li>public ReplaceStringInFiles(String initialDirectoryPath, String oldString, String newString, String[] onlyFileExtensions, int bufferSize) - 
+Initialize the String file replacer with a process only specific types of text file extensions with file read and write buffer size. 
+For example, only replace .css files while bulk replace text files.
+File extension other than .css files will be ignored.</li> <br>
+
+<li>public ReplaceStringInFiles(String initialDirectoryPath, String oldString, String newString) - 
+Initialize the String file replacer, which will process and replace string occurrences in all text files, regardless of their extension.</li> <br>
+
+<li>ReplaceStringInFiles(String initialDirectoryPath, String oldString, String newString, int bufferSize) - 
+Initialize the String file replacer with a buffer size for file read and write operation,
+which will process and replace string occurrences in all text files, regardless of their extension.</li>
+</ul>
+
+Class `javadev.stringcollections.textreplacor.writer.ReplaceStringInAFile`
+
+<ul>
+<li>public ReplaceStringInAFile(File file, String oldString, String newString) - 
+Intialize Single Text File Replacer to replace a String occurrence in the passed file</li> <br>
+<li>public ReplaceStringInAFile(File file, String oldString, String newString, int bufferSize)  - 
+Intialize Single Text File Replacer with buffer size for read and write file
+to replace a String occurrence in the passed file</li>
+</ul>
 
 # Methods
 
