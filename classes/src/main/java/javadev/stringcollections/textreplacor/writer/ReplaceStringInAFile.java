@@ -45,7 +45,7 @@ public class ReplaceStringInAFile {
         this.file = file;
         this.oldString = oldString;
         this.newString = newString;
-        this.bufferSize = 1024;
+        this.bufferSize = -1;
     }
 
     /**
@@ -177,6 +177,11 @@ public class ReplaceStringInAFile {
 
         // now read in chunks and replace the string if any match found
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+
+            // if buffer size is -1
+            if (bufferSize == -1) {
+                bufferSize = getBufferSize(oldString);
+            }
             char[] buffer = new char[bufferSize];
             int read;
             while ((read = reader.read(buffer)) != -1) {
@@ -272,6 +277,15 @@ public class ReplaceStringInAFile {
                 Logger.logCustom(clazz, methodName, message);
                 break;
         }
+    }
+
+    /**
+     * Get the buffer size according to the old string size
+     * @param oldString old string
+     *                  @return buffer size
+     */
+    public static int getBufferSize(String oldString) {
+        return Math.max(oldString.length() * 2, 1024);
     }
 
 
