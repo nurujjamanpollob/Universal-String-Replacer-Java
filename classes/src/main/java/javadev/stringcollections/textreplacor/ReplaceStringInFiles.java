@@ -97,7 +97,7 @@ public class ReplaceStringInFiles {
         this.initialDirectoryPath = initialDirectoryPath;
         this.oldString = oldString;
         this.newString = newString;
-        this.bufferSize = 1024;
+        this.bufferSize = -1;
         this.proceedOnlyFilesWithExtensions = false;
         this.useFiltering = true;
     }
@@ -134,7 +134,7 @@ public class ReplaceStringInFiles {
         this.initialDirectoryPath = initialDirectoryPath;
         this.oldString = oldString;
         this.newString = newString;
-        this.bufferSize = 1024;
+        this.bufferSize = -1;
         this.proceedOnlyFilesWithExtensions = true;
         this.useFiltering = true;
     }
@@ -170,7 +170,7 @@ public class ReplaceStringInFiles {
         this.initialDirectoryPath = initialDirectoryPath;
         this.oldString = oldString;
         this.newString = newString;
-        this.bufferSize = 1024;
+        this.bufferSize = -1;
         this.proceedOnlyFilesWithExtensions = false;
         this.useFiltering = false;
     }
