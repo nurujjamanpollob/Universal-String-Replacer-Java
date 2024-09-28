@@ -15,10 +15,14 @@ public class ReplaceStringInFilesTest {
     @Test
     public void testReplaceStringInFiles() {
 
+        // create 10 mb chunk byte size
+        int chunkByteSize = 1024;
+
         ReplaceStringInFiles replaceStringInFiles = new ReplaceStringInFiles(
                 "src/main/resources/test-files",
                 "me",
-                "I've Replaced Already!"
+                "I've Replaced Already!",
+                chunkByteSize
         );
 
         try {
