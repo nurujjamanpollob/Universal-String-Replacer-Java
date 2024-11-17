@@ -29,6 +29,12 @@ This project usages **Gradle**, so run this command to build the jar file:
 
 `gradle build`
 
+If you need to include this project as a dependency in your project, run this command:
+
+`gradle shadowJar`
+
+A fat jar file will be created in the `build/libs` directory. Include this jar file in your project.
+
 # Using the library
 
 To replace a string in all/selected files under a directory, use this class:
