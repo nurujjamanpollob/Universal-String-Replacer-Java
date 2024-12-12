@@ -1,3 +1,4 @@
 rootProject.name = 'Universal-String-Replacer-Java'
 include 'classes'
+include 'run-module'
 
