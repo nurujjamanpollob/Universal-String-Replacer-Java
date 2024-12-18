@@ -280,8 +280,8 @@ public class ReplaceStringInFiles {
 
         // loop through the ignored file extensions
         for (String ignoreFileExtension : ignoreFileExtensions) {
-            // if the file name ends with the ignore file extension
-            if (fileName.endsWith(ignoreFileExtension)) {
+            // if the file name ends with the ignore file extension without case sensitivity
+            if (fileName.toLowerCase().endsWith(ignoreFileExtension.toLowerCase())) {
                 return true;
             }
         }
@@ -307,8 +307,8 @@ public class ReplaceStringInFiles {
 
         // loop through the ignored file extensions
         for (String onlyFileExtension : onlyFileExtensions) {
-            // if the file name ends with the ignore file extension
-            if (fileName.endsWith(onlyFileExtension)) {
+            // if the file name ends with the ignore file extension, file extension check without case sensitivity
+            if (fileName.toLowerCase().endsWith(onlyFileExtension.toLowerCase())) {
                 return isTextFile(file);
             }
         }
