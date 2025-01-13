@@ -1,5 +1,6 @@
 package javadev.stringcollections.textreplacor;
 
+import javadev.stringcollections.textreplacor.console.ColoredConsoleOutput;
 import javadev.stringcollections.textreplacor.exception.TextReplacerError;
 import javadev.stringcollections.textreplacor.filesquery.DirectoryReader;
 import javadev.stringcollections.textreplacor.writer.ReplaceStringInAFile;
@@ -220,13 +221,7 @@ public class ReplaceStringInFiles {
 
         // loop through the files
         for (File file : files) {
-            // if the file should be processed
-            if (shouldProcessFile(file)) {
-                // replace the string in the file
-                ReplaceStringInAFile replaceStringInAFile = new ReplaceStringInAFile(file, oldString, newString, bufferSize);
-                replaceStringInAFile.setUseLogger(useLogging);
-                replaceStringInAFile.replaceString();
-            }
+           processFile(file);
         }
 
         // show log that the process is completed
@@ -245,20 +240,54 @@ public class ReplaceStringInFiles {
      * <p>
      * This method is designed with a future extension in mind, in case if we need to add more conditions to process the file.
      */
-    public boolean shouldProcessFile(File file) {
+    public void processFile(File file) throws TextReplacerError {
+
 
         // if filtering is disabled, return true
         if (!useFiltering) {
-            return isTextFile(file) && isFileValid(file); // return true if the file is a text file
-        }
 
-        // if a file is null or not a file
-        if (file == null || !file.isFile() || isFileExtensionInIgnoreList(file)) {
-            return false;
-        }
+            // execute if the file is valid and text mime type
+            if (isFileValid(file) && isTextFile(file)) {
+                // replace the string in the file
+                ReplaceStringInAFile replaceStringInAFile = new ReplaceStringInAFile(file, oldString, newString, bufferSize);
+                replaceStringInAFile.setUseLogger(useLogging);
+                replaceStringInAFile.replaceString();
+            }
+        } else {
 
-        // if the file is in the process-only list
-        return isFileExtensionInProcessOnlyList(file) ? isFileValid(file) : isTextFile(file) && isFileValid(file);
+
+            if (isFileExtensionInIgnoreList(file)) {
+                // Do Log
+                logMessage("File %s is ignored due to provided settings".formatted(file.getAbsolutePath()), LogType.INFO);
+
+                // Show log that the file is ignored
+                ColoredConsoleOutput.printBlueText("File %s is ignored due to provided settings".formatted(file.getAbsolutePath()));
+
+                return;
+            }
+
+            // check if file is in process list only, otherwise detect if text file and process
+            if (isFileExtensionInProcessOnlyList(file)) {
+                // replace the string in the file
+                ReplaceStringInAFile replaceStringInAFile = new ReplaceStringInAFile(file, oldString, newString, bufferSize);
+                replaceStringInAFile.setUseLogger(useLogging);
+                replaceStringInAFile.replaceString();
+            } else {
+                // if the file is valid and text mime type
+                if (isFileValid(file) && isTextFile(file)) {
+                    // replace the string in the file
+                    ReplaceStringInAFile replaceStringInAFile = new ReplaceStringInAFile(file, oldString, newString, bufferSize);
+                    replaceStringInAFile.setUseLogger(useLogging);
+                    replaceStringInAFile.replaceString();
+
+                    // Do Log
+                    logMessage("File %s is processed".formatted(file.getAbsolutePath()), LogType.INFO);
+                } else {
+                    // Do Log
+                    logMessage("File %s is ignored due to provided settings and not being a text file".formatted(file.getAbsolutePath()), LogType.INFO);
+                }
+            }
+        }
 
     }
 
@@ -280,6 +309,7 @@ public class ReplaceStringInFiles {
 
         // loop through the ignored file extensions
         for (String ignoreFileExtension : ignoreFileExtensions) {
+
             // if the file name ends with the ignore file extension without case sensitivity
             if (fileName.toLowerCase().endsWith(ignoreFileExtension.toLowerCase())) {
                 return true;
