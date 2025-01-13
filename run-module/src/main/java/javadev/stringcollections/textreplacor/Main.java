@@ -24,8 +24,7 @@ public class Main {
         if (isDirectoryExist(inputDirectoryPath)) {
             System.out.println("Directory Exists, Now doing the replacement...");
             try {
-                ReplaceStringInFiles replaceStringInFiles = new ReplaceStringInFiles(inputDirectoryPath, textToReplace, textToReplaceWith, 1024);
-                replaceStringInFiles.setUseLogging(false);
+                ReplaceStringInFiles replaceStringInFiles = getIgnorFilesList(inputDirectoryPath, textToReplace, textToReplaceWith);
                 replaceStringInFiles.replaceStringInFiles();
             } catch (TextReplacerError e) {
 
@@ -37,6 +36,25 @@ public class Main {
             System.out.println("Directory Not Exist, Exiting...");
             System.exit(0);
         }
+    }
+
+    private static ReplaceStringInFiles getIgnorFilesList(String inputDirectoryPath, String textToReplace, String textToReplaceWith) {
+        String[] ignoreFileExtensions = new String[] {
+                "woff",
+                "woff2",
+                "ttf",
+                "eot",
+                "svg",
+                "png",
+                "jpg",
+                "jpeg",
+                "gif",
+                "ico",
+                "otf",
+                "webp"};
+        ReplaceStringInFiles replaceStringInFiles = new ReplaceStringInFiles(ignoreFileExtensions, inputDirectoryPath, textToReplace, textToReplaceWith, 1024);
+        replaceStringInFiles.setUseLogging(false);
+        return replaceStringInFiles;
     }
 
     private static boolean isDirectoryExist(String inputDirectoryPath) {
