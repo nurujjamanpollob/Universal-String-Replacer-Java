@@ -10,7 +10,7 @@ public class RandomGenerator {
 
 
     /**
-     * Method that generates a random String in a given length
+     * Method that generates a random String in a given length with alphabets, numbers and special characters.
      * @param length length of the random string
      * @return random string
      */

@@ -1,0 +1,3 @@
+This text is a t'est(ignore comma) file for the string occurrence finder feature.
+This file contains some text you see, but it does not contain the word "t'est".
+So no occurrences of the word "t'est" should be found in this file.

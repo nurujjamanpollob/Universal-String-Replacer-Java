@@ -1,0 +1,9 @@
+This file is a te'st(ignore comma) file for the string occurrence finder feature. Now, we will put some occurrence text below:
+
+1: test
+2: test,test
+3: test and again test
+
+that's it. The library should output the number of occurrences of the string "te'st" in this file. In our case, it should be 5 occurrences.
+line numbers: 3,4,5
+indexes: line 3 {3-6}, line 4 {3-6, 8-11}, line 5 {3-6, 18-21}

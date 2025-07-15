@@ -1,13 +1,10 @@
-package javadev.stringcollections.textreplacor.filesquery;
-
+package javadev.stringcollections.textreplacor.io;
 
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,11 +34,6 @@ public class DirectoryReader {
      */
     public DirectoryReader(String directoryPath) {
         this.directoryPath = directoryPath;
-    }
-
-    public static boolean fileExists(String testFile) {
-
-        return new File(testFile).exists();
     }
 
 
@@ -153,7 +145,7 @@ public class DirectoryReader {
      *         </pre>
      *
      */
-    public @Nullable File[] listAllFilesAndDirectories(Boolean includeDirectories, String... fileExtensions) {
+    public File[] listAllFilesAndDirectories(Boolean includeDirectories, String... fileExtensions) {
 
         File[] files = listAllFilesAndDirectories();
 
@@ -253,44 +245,6 @@ public class DirectoryReader {
         // copy subFiles to allFiles
         System.arraycopy(subFiles, 0, allFiles, files.length, subFiles.length);
         return allFiles;
-    }
-
-    /**
-     * This method returns base resource path of a jar file
-     * @return base resource path of a jar file
-     * @throws IOException if it fails to get base resource path
-     */
-    public static String getBaseResourcePath() throws IOException {
-
-        URL absoluteURL = Thread.currentThread().getContextClassLoader().getResource("");
-
-        if (absoluteURL == null) {
-            throw new IOException("Cannot get base resource path");
-        }
-
-        return absoluteURL.getPath();
-    }
-
-    /**
-     * This method returns an absolute path of resources directory, following the path of a file in resources directory
-     * @param path path of a file in resources directory, for example, if a file named <b>{jar}/resources/win/lib/file.txt</b>,
-     *             you should pass <b>/win/lib/file.txt</b> as parameter.
-     * @return absolute path of resources directory
-     */
-    public static String getAbsoluteResourcePath(String path) throws IOException {
-
-        if (path == null) {
-            throw new IOException("Path is null");
-        }
-
-        // Get current running file absolute path, suppose, I am running the jar file from, C:\Users\Nuru\Desktop\myapp.jar, so I expect the absolute path to be C:\Users\Nuru\Desktop\myapp.jar
-        URL absoluteURL = Thread.currentThread().getContextClassLoader().getResource(path);
-
-        if (absoluteURL == null) {
-            throw new IOException("File not found, at this location: " + path);
-        }
-
-        return absoluteURL.getPath();
     }
 
 }
