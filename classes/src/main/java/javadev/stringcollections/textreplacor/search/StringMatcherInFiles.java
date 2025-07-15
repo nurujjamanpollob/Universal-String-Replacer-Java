@@ -34,6 +34,17 @@ public class StringMatcherInFiles {
     }
 
     /**
+     * Construct a StringMatcherInFiles object with a default search string. It access a file object instance
+     * and uses its absolute path as the directory path.
+     * @param file the File object representing the directory to search in
+     * @param searchString the String to search for in the files
+     */
+    public StringMatcherInFiles(File file, String searchString) {
+        this.directoryPath = file.getAbsolutePath();
+        this.searchString = searchString;
+    }
+
+    /**
      * Returns the directory path where the search will be performed.
      *
      * @return the directory path as a String

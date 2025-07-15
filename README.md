@@ -5,12 +5,15 @@ This Java library contains a list of classes that can be used to perform various
 <ul>
 <li>Reading files and subdirectories</li>
 <li> Find and replace a string occurrence in the files under a directory depending on provided parameters.</li>
+<li>Find a string occurrence in a file or files under a directory.</li>
 </ul>
 
 I've created this library to help developers to perform file-system-based operations in a simple and easy way.
 
-This library's primary goal is providing a flexible java library to bulk replace a string occurrence in the files under
+This library's primary goal is providing a flexible java library to bulk find & replace a string occurrence in the files under
 a directory.
+
+Reading text file for occurrence is introduced recently with version 2.0.0, with similar functionality to the previous version, bulk processing in its core always.
 
 All APIs are well-tested, and it reliably tests and read and replaces the string in only text files.
 This library does not read or replace the string in binary files,
@@ -20,6 +23,8 @@ extensions, which I refer to as "filtering.".
 However, files may be skipped even if you use filtering, if the file is not a text file.
 
 The documentation will be updated soon.
+
+Last updated: 2025-07-15
 
 # Building the project
 
@@ -70,6 +75,49 @@ Code example:
                 e.printStackTrace();
         }
 
+To find a string in a file, use this class:
+
+`javadev.stringcollections.textreplacor.search.FindOccurrencesInAString`
+
+Code example:
+
+```java
+        FindOccurrencesInAString findOccurrencesInAString = new FindOccurrencesInAString(new File("test.txt"), "test"); // initialize the search with the file and the string to find
+        // or you can initilize the search with a string and a string to find
+        FindOccurrencesInAString findOccurrencesInAString = new FindOccurrencesInAString("This is a test string", "test"); // initialize the search with a string and the string to find
+        // find occurrences in the string
+        TextSearchResult resultObj = findOccurrencesInAString.findOccurrences();
+        // from the result object, you can now access the occurrences and their positions by accessing the Line objects from the result object
+        List<Line> lines = resultObj.getLines();
+        // play with the lines or do whatever you want with the lines
+        for (Line line : lines) {
+            System.out.println(line);
+        }
+
+```
+
+If you need to find a string in all files under a directory, use this class:
+
+`javadev.stringcollections.textreplacor.search.StringMatcherInFiles`
+
+Code example:
+
+```java
+        StringMatcherInFiles stringMatcherInFiles = new StringMatcherInFiles("src/main/resources/test-files", "test"); // initialize the search with the directory and the string to find
+        // or you can initialize the search with a directory and a string to find
+        StringMatcherInFiles stringMatcherInFiles = new StringMatcherInFiles(new File("src/main/resources/test-files"), "test"); // initialize the search with a directory and the string to find
+        // find occurrences in the files
+        List<TextSearchResult> results = stringMatcherInFiles.findOccurrences();
+        // from the result object, you can now access the occurrences and their positions by accessing the Line objects from the result object
+        for (TextSearchResult result : results) {
+            List<Line> lines = result.getLines();
+            // play with the lines or do whatever you want with the lines
+            for (Line line : lines) {
+                System.out.println(line);
+            }
+        }
+```
+
 # Performance
 
 This library was tested with a 70MB+ text file with a 10MB buffer size,
@@ -118,6 +166,22 @@ Intialize Single Text File Replacer to replace a String occurrence in the passed
 <li>public ReplaceStringInAFile(File file, String oldString, String newString, int bufferSize)  - 
 Intialize Single Text File Replacer with buffer size for read and write file
 to replace a String occurrence in the passed file</li>
+</ul>
+
+Class `javadev.stringcollections.textreplacor.search.FindOccurrencesInAString`
+<ul>
+<li>public FindOccurrencesInAString(File file, String stringToFind) - 
+Initialize the search with a file and the string to find.</li> <br>
+<li>public FindOccurrencesInAString(String string, String stringToFind) -
+Initialize the search with a string and the string to find.</li> <br>
+</ul>
+
+Class `javadev.stringcollections.textreplacor.search.StringMatcherInFiles`
+<ul>
+<li>public StringMatcherInFiles(String initialDirectoryPath, String stringToFind) -
+Initialize the search with a directory and the string to find.</li> <br>
+<li>public StringMatcherInFiles(File initialDirectory, String stringToFind) -
+Initialize the search with a directory and the string to find.</li> <br>
 </ul>
 
 # Methods
