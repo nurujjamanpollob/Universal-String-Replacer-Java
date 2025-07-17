@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
+public class BulkStringReplacer {
     public static void main(String[] args) {
         System.out.println("Welcome to bulk String replacement tool.");
         System.out.println("This tool will help you to replace a text in all files under a directory with another text.");
