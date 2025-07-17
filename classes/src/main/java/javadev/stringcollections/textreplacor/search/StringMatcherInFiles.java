@@ -1,8 +1,12 @@
 package javadev.stringcollections.textreplacor.search;
 
+import javadev.stringcollections.textreplacor.ReplaceStringInFiles;
 import javadev.stringcollections.textreplacor.filesquery.DirectoryReader;
 import javadev.stringcollections.textreplacor.object.TextSearchResult;
+import javadev.stringcollections.textreplacor.writer.ReplaceStringInAFile;
 import librarycollections.nurujjamanpollob.mimedetector.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -19,8 +23,27 @@ import java.util.List;
  */
 public class StringMatcherInFiles {
 
+    /**
+     * -- GETTER --
+     *  Returns the directory path where the search will be performed.
+     *
+     * @return the directory path as a String
+     */
+    @Getter
     private final String directoryPath;
+    /**
+     * -- GETTER --
+     *  Returns the String that will be searched in the files.
+     *
+     * @return the search String
+     */
+    @Getter
     private final String searchString;
+    @Setter
+    private boolean includeTextWhereMatched = false; // If true, the text where the search string matched will be included in the result// .
+    @Setter
+    @Getter
+    private boolean useLogging = false; // If true, the class will log data using ReplaceStringInAFile.logData() method
 
     /**
      * Constructor to initialize a StringMatcherInFiles object.
@@ -44,23 +67,6 @@ public class StringMatcherInFiles {
         this.searchString = searchString;
     }
 
-    /**
-     * Returns the directory path where the search will be performed.
-     *
-     * @return the directory path as a String
-     */
-    public String getDirectoryPath() {
-        return directoryPath;
-    }
-
-    /**
-     * Returns the String that will be searched in the files.
-     *
-     * @return the search String
-     */
-    public String getSearchString() {
-        return searchString;
-    }
 
     /**
      * Starts the search for the String in the files of the directory.
@@ -81,15 +87,27 @@ public class StringMatcherInFiles {
 
         List<File> files = directoryReader.listAllFiles();
 
+        // log
+        logData("search", "Searching for '" + searchString + "' in directory: " + directoryPath, ReplaceStringInFiles.LogType.INFO);
+        // show how many files found
+        logData("search", "Found " + files.size() + " files in directory: " + directoryPath, ReplaceStringInFiles.LogType.INFO);
+
         for (File file : files) {
             if (isTextFile(file)) {
+                // log
+                logData("search", "Searching in file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.INFO);
 
                 FindOccurrencesInAString findOccurrencesInAString = new FindOccurrencesInAString(file, searchString);
+                findOccurrencesInAString.setIncludeTextWhereMatched(includeTextWhereMatched);
 
                 TextSearchResult textSearchResult = findOccurrencesInAString.findOccurrences();
 
                 // if object is not null and result is not empty, add to results
                 if (textSearchResult != null && textSearchResult.lines().length > 0) {
+                    // log
+                    logData("search", "Found " + textSearchResult.lines().length + " occurrences in file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.INFO);
+                    // log the text search result by toString() method
+                    logData("search", "TextSearchResult: " + textSearchResult, ReplaceStringInFiles.LogType.INFO);
                     textSearchResults.add(textSearchResult);
                 }
 
@@ -97,6 +115,7 @@ public class StringMatcherInFiles {
         }
         // if no results found, return null
         if (textSearchResults.isEmpty()) {
+            logData("search", "No occurrences found for '" + searchString + "' in directory: " + directoryPath, ReplaceStringInFiles.LogType.INFO);
             return null;
         }
 
@@ -117,8 +136,8 @@ public class StringMatcherInFiles {
         try {
             match = Magic.getMagicMatch(file, true, false);
         } catch (MagicParseException | MagicMatchNotFoundException | MagicException e) {
-            // print error message
-            System.err.println("Error determining MIME type for file: " + file.getAbsolutePath());
+            // log error
+            ReplaceStringInAFile.logData(StringMatcherInFiles.class, "isTextFile", "Error detecting MIME type for file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.ERROR);
             e.printStackTrace();
             return false;
         }
@@ -129,16 +148,36 @@ public class StringMatcherInFiles {
     // this method validate passed arguments for error and throw IOException if any error found
     private void validateArguments() throws IOException {
         if (directoryPath == null || directoryPath.isEmpty()) {
+            // log
+            logData("validateArguments", "Directory path is null or empty", ReplaceStringInFiles.LogType.ERROR);
             throw new IOException("Directory path is null or empty");
         }
         if (!DirectoryReader.fileExists(directoryPath)) {
+            // log
+            logData("validateArguments", "Directory does not exist at " + directoryPath, ReplaceStringInFiles.LogType.ERROR);
             throw new IOException("Directory does not exist at " + directoryPath);
         }
         if (!new File(directoryPath).isDirectory()) {
+            // log
+            logData("validateArguments", "Path is not a directory at " + directoryPath, ReplaceStringInFiles.LogType.ERROR);
             throw new IOException("Path is not a directory at " + directoryPath);
         }
         if (searchString == null || searchString.isEmpty()) {
+            // log
+            logData("validateArguments", "Search string is null or empty", ReplaceStringInFiles.LogType.ERROR);
             throw new IOException("Search string is null or empty");
         }
     }
+
+    public boolean isIncludeTextWhereMatched() {
+        return includeTextWhereMatched;
+    }
+
+    // logger method to log when useLogging is true
+    public void logData(String methodName, String message, ReplaceStringInFiles.LogType logType) {
+        if (useLogging) {
+            ReplaceStringInAFile.logData(this.getClass(), methodName, message, logType);
+        }
+    }
+
 }

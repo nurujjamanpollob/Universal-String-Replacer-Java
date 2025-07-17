@@ -259,6 +259,13 @@ public class ReplaceStringInAFile {
 
     }
 
+    /**
+     * This method used to log the data
+     * @param clazz class
+     * @param methodName method name
+     * @param message message to log
+     * @param logType log type
+     */
     public static void logData(Class<?> clazz, String methodName, String message, ReplaceStringInFiles.LogType logType) {
         switch (logType) {
             case INFO:

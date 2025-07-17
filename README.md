@@ -88,7 +88,7 @@ Code example:
         // find occurrences in the string
         TextSearchResult resultObj = findOccurrencesInAString.findOccurrences();
         // from the result object, you can now access the occurrences and their positions by accessing the Line objects from the result object
-        List<Line> lines = resultObj.getLines();
+        List<Line> lines = resultObj.lines();
         // play with the lines or do whatever you want with the lines
         for (Line line : lines) {
             System.out.println(line);
@@ -107,10 +107,10 @@ Code example:
         // or you can initialize the search with a directory and a string to find
         StringMatcherInFiles stringMatcherInFiles = new StringMatcherInFiles(new File("src/main/resources/test-files"), "test"); // initialize the search with a directory and the string to find
         // find occurrences in the files
-        List<TextSearchResult> results = stringMatcherInFiles.findOccurrences();
+        List<TextSearchResult> results = stringMatcherInFiles.search();
         // from the result object, you can now access the occurrences and their positions by accessing the Line objects from the result object
         for (TextSearchResult result : results) {
-            List<Line> lines = result.getLines();
+            List<Line> lines = result.lines();
             // play with the lines or do whatever you want with the lines
             for (Line line : lines) {
                 System.out.println(line);
