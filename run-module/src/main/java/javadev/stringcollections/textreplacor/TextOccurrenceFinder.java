@@ -110,7 +110,7 @@ public class TextOccurrenceFinder {
             TextSearchResultSaver textSearchResultSaver = new TextSearchResultSaver();
             try {
                 // save the results to a JSON file
-                textSearchResultSaver.saveResultsToJsonFile(results, saveLocation, directoryPath);
+                textSearchResultSaver.saveResultsToJsonFile(results, saveLocation, directoryPath, textToSearch);
                 ColoredConsoleOutput.printGreenText("Results saved successfully to: " + saveLocation);
             } catch (IOException e) {
                 ColoredConsoleOutput.printRedText("Error saving results: " + e.getMessage());
@@ -118,7 +118,7 @@ public class TextOccurrenceFinder {
         } else {
             ColoredConsoleOutput.printGreenText("Results not saved. Result is available in the console output below: ");
 
-            ColoredConsoleOutput.printGreenText(JSONObjectUtility.formatJson(TextSearchResultSaver.getJsonStructure(results, directoryPath)));
+            ColoredConsoleOutput.printGreenText(JSONObjectUtility.formatJson(TextSearchResultSaver.getJsonStructure(results, directoryPath, textToSearch)));
         }
 
     }

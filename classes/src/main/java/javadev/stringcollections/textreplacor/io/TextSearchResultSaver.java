@@ -86,9 +86,10 @@ public class TextSearchResultSaver {
      * @param rootDirectory the root directory path to be included in the JSON file.
      * @param saveLocation the directory where the JSON file will be saved.
      *                     The paths will be created if they do not exist.
+     * @param searchPhrase the search phrase used to find the results, which will be included in the JSON file.
      * @throws java.io.IOException if an I/O error occurs while saving the file.
      */
-    public void saveResultsToJsonFile(List<TextSearchResult> results, String saveLocation, String rootDirectory) throws IOException {
+    public void saveResultsToJsonFile(List<TextSearchResult> results, String saveLocation, String rootDirectory, String searchPhrase) throws IOException {
         // check if the path is existing or not
         if (results == null || results.isEmpty() || saveLocation == null || saveLocation.isEmpty()) {
             throw new IOException("Results or save location cannot be null or empty. Please provide valid inputs.");
@@ -97,7 +98,7 @@ public class TextSearchResultSaver {
         PathResolver.resolvePathIfNotExists(saveLocation);
 
         // Now we can create the JSON structure and save it to a file
-        String jsonStructure = JSONObjectUtility.formatJson(getJsonStructure(results, rootDirectory));
+        String jsonStructure = JSONObjectUtility.formatJson(getJsonStructure(results, rootDirectory, searchPhrase));
 
         // check if file is exists, so abandon the operation
         if (PathResolver.isPathExists(saveLocation)) {
@@ -112,7 +113,7 @@ public class TextSearchResultSaver {
     /**
      * Convert a list of {@link TextSearchResult} object to JSON compatible String Return the JSON Structure of the search results
      */
-    public static String getJsonStructure(List<TextSearchResult> results, String rootDirectory) {
+    public static String getJsonStructure(List<TextSearchResult> results, String rootDirectory, String searchPhrase) {
 
         // Null and empty checks
         if (results == null || results.isEmpty() || rootDirectory == null || rootDirectory.isEmpty()) {
@@ -122,6 +123,7 @@ public class TextSearchResultSaver {
         StringBuilder jsonBuilder = new StringBuilder();
         jsonBuilder.append("{\n");
         jsonBuilder.append("\"rootDirectory\": \"").append(JSONObjectUtility.escapeSpecialCharacters(rootDirectory)).append("\",\n");
+        jsonBuilder.append("\"searchPhrase\": \"").append(JSONObjectUtility.escapeSpecialCharacters(searchPhrase)).append("\",\n");
         jsonBuilder.append("\"results\": [\n");
 
         for (int i = 0; i < results.size(); i++) {

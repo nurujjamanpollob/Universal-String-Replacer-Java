@@ -66,7 +66,7 @@ public class TextSearchResultSaverTest {
         String saveLocation = "src/main/resources/test-files/search-results.json";
         String rootDirectory = "C:/projects/my-root-dir";
         try {
-            saver.saveResultsToJsonFile(results, saveLocation, rootDirectory);
+            saver.saveResultsToJsonFile(results, saveLocation, rootDirectory, "test");
             ColoredConsoleOutput.printGreenText("Results saved successfully to " + saveLocation);
         } catch (Exception e) {
             ColoredConsoleOutput.printRedText("Failed to save results: " + e.getMessage());
