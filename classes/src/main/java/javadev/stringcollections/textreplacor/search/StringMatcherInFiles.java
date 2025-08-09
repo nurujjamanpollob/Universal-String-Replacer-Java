@@ -44,6 +44,9 @@ public class StringMatcherInFiles {
     @Setter
     @Getter
     private boolean useLogging = false; // If true, the class will log data using ReplaceStringInAFile.logData() method
+    @Setter
+    @Getter
+    private boolean skipLineCollection = false; // If true, the class will not collect line information in the result. Default is false.
 
     /**
      * Constructor to initialize a StringMatcherInFiles object.
@@ -99,16 +102,26 @@ public class StringMatcherInFiles {
 
                 FindOccurrencesInAString findOccurrencesInAString = new FindOccurrencesInAString(file, searchString);
                 findOccurrencesInAString.setIncludeTextWhereMatched(includeTextWhereMatched);
+                findOccurrencesInAString.setSkipLineCollection(skipLineCollection);
 
                 TextSearchResult textSearchResult = findOccurrencesInAString.findOccurrences();
 
-                // if object is not null and result is not empty, add to results
-                if (textSearchResult != null && textSearchResult.lines().length > 0) {
-                    // log
-                    logData("search", "Found " + textSearchResult.lines().length + " occurrences in file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.INFO);
-                    // log the text search result by toString() method
-                    logData("search", "TextSearchResult: " + textSearchResult, ReplaceStringInFiles.LogType.INFO);
-                    textSearchResults.add(textSearchResult);
+                if(!skipLineCollection) {
+                    // if object is not null and result is not empty, add to results
+                    if (textSearchResult != null && textSearchResult.lines().length > 0) {
+                        // log
+                        logData("search", "Found " + textSearchResult.lines().length + " occurrences in file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.INFO);
+                        // log the text search result by toString() method
+                        logData("search", "TextSearchResult: " + textSearchResult, ReplaceStringInFiles.LogType.INFO);
+                        textSearchResults.add(textSearchResult);
+                    }
+                } else {
+                    // if skipLineCollection is true, we only care about the file and not the lines
+                    if (textSearchResult != null) {
+                        // log
+                        logData("search", "Found occurrences in file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.INFO);
+                        textSearchResults.add(textSearchResult);
+                    }
                 }
 
             }

@@ -132,5 +132,31 @@ public class FindOccurrenceInAStringTest {
         }
     }
 
+    /**
+     * Test with valid file, valid query, but skip line collection
+     * This test is to check if the method can handle the case where no lines are collected
+     */
+    @Test
+    public void testFindOccurrencesWithSkipLineCollection() {
+        String testFile = "src/main/resources/test-files/string-occurrence-test-5-occurrences";
+        // create a new instance of FindOccurrencesInAString
+        FindOccurrencesInAString findOccurrencesInAString = new FindOccurrencesInAString(new File(testFile), "test");
+        // set includeTextWhereMatched to false
+        findOccurrencesInAString.setSkipLineCollection(true);
+        try {
+            // find occurrences in the string
+            TextSearchResult resultObj = findOccurrencesInAString.findOccurrences();
+            // assert the object is not null
+            assert resultObj != null : "Expected result object to be not null, but found null";
+            // assert that lines are empty
+            assert resultObj.lines().length == 0 : "Expected lines to be empty, but found " + resultObj.lines().length;
+            // show find occurrence test is successful
+            ColoredConsoleOutput.printGreenText("Find Occurrence Test with Skip Line Collection is Successful!");
+        } catch (Exception e) {
+            // handle the exception
+            e.printStackTrace();
+        }
+    }
+
 
 }

@@ -43,12 +43,15 @@ public class FindOccurrencesInAString {
     private final boolean isInitilizedWithFile;
 
     private boolean useLogging = false; // If true, logging will be used to log the search process. Default is false.
+    @Setter
+    @Getter
+    private boolean skipLineCollection = false; // If true, the line collection will be skipped. Default is false.
 
     /**
-
-    /**
+     * /**
      * Constructor to initialize the input string and search string.
-     * @param inputString the string in which to search
+     *
+     * @param inputString  the string in which to search
      * @param searchString the string to search for
      */
     public FindOccurrencesInAString(@NotNull String inputString, @NotNull String searchString) {
@@ -60,8 +63,9 @@ public class FindOccurrencesInAString {
 
     /**
      * Constructor to initialize the input string and search string from a file.
+     *
      * @param inputFilePath the path to the file containing the input string
-     * @param searchString the string to search for
+     * @param searchString  the string to search for
      */
     public FindOccurrencesInAString(@NotNull File inputFilePath, @NotNull String searchString) {
         // Here you would typically read the file content into inputString
@@ -81,9 +85,10 @@ public class FindOccurrencesInAString {
 
     /**
      * Performs search on a buffer and return a list of {@link javadev.stringcollections.textreplacor.object.Line} object containing the search results(character start, end, line number, etc.). null returned if no occurrences found.
-     * @param buffer the string to search within
+     *
+     * @param buffer       the string to search within
      * @param searchString the string to search for
-     * @param lineNumber the line number in the text. the line number will be incremented by 1 because array index starts from 0!
+     * @param lineNumber   the line number in the text. the line number will be incremented by 1 because array index starts from 0!
      * @return a {@link javadev.stringcollections.textreplacor.object.Line} array of found occurrences, or null if no occurrences are found.
      */
     public @Nullable Line[] findAndReturnOccurrence(@NotNull String buffer, @NotNull String searchString, int lineNumber) {
@@ -99,7 +104,7 @@ public class FindOccurrencesInAString {
         int index = buffer.indexOf(searchString); // Find the first occurrence of searchString
         while (index != -1) {
 
-            Line occurrence = includeTextWhereMatched ? new Line(lineNumber, buffer, index, index + searchString.length() - 1): new Line(lineNumber, "", index, index + searchString.length() - 1);
+            Line occurrence = includeTextWhereMatched ? new Line(lineNumber, buffer, index, index + searchString.length() - 1) : new Line(lineNumber, "", index, index + searchString.length() - 1);
 
             // log all object by toString() method
             logData(
@@ -128,93 +133,162 @@ public class FindOccurrencesInAString {
     /**
      * This method perform search on the file or string in line by line and return a {@link javadev.stringcollections.textreplacor.object.TextSearchResult} object containing the search results for each line.
      * If this class initialized with file, the file path included, otherwise file path will be empty in the {@link javadev.stringcollections.textreplacor.object.TextSearchResult} object.
-     * @throws IOException if an I/O error occurs while reading the file.
+     *
      * @return a {@link javadev.stringcollections.textreplacor.object.TextSearchResult} object containing the search results for each line. Null returned if no occurrences found.
+     * TextSearch May skip Line Collection if skipLineCollection is set to true.
+     * If skipLineCollection is true, it will read the file or string and check if the search string exists in the content.
+     * If it exists, it will return a TextSearchResult object with an empty array of lines and the file path (if initialized with a file).
+     * If it does not exist, it will return null.
+     * If skipLineCollection is false, it will perform the search line by line and return a TextSearchResult object containing the found occurrences.
+     * @throws IOException if an I/O error occurs while reading the file.
      */
     public @Nullable TextSearchResult findOccurrences() throws IOException {
 
-        // create a ArrayList to hold the search results
-        java.util.List<Line> searchResults = new ArrayList<>();
-
-        // if this class initialized
-        if (isInitilizedWithFile) {
-            // log the start of the search if logging is enabled
+        // if no line collection is needed, We will skip the line collection
+        if (skipLineCollection) {
             logData(
                     "findOccurrences()",
-                    "Starting search in file: " + inputFilePath.getAbsolutePath() + " for string: " + searchString,
+                    "Skipping line collection as skipLineCollection is set to true.",
                     ReplaceStringInFiles.LogType.INFO
             );
+            // we read the file, if no occurrences found, return null
+            if (isInitilizedWithFile) {
+                logData(
+                        "findOccurrences()",
+                        "Reading file: " + inputFilePath.getAbsolutePath() + " for string: " + searchString,
+                        ReplaceStringInFiles.LogType.INFO
+                );
+                // read the file and find occurrences
+                String content = new String(java.nio.file.Files.readAllBytes(inputFilePath.toPath()));
 
-            // read the file line by line
-            try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(inputFilePath))) {
-                String line;
-                int lineNumber = 1; // Start line number from 1
-                while ((line = reader.readLine()) != null) {
-                    // find occurrences in the current line
-                    Line[] occurrences = findAndReturnOccurrence(line, searchString, lineNumber);
+                boolean isMatchExits = content.contains(searchString);
+                if (!isMatchExits) {
+                    logData(
+                            "findOccurrences()",
+                            "No occurrences found in file: " + inputFilePath.getAbsolutePath() + " " +
+                                    "for string: " + searchString,
+                            ReplaceStringInFiles.LogType.INFO
+                    );
+                    return null; // Return null if no occurrences found
+                } else {
+                    logData(
+                            "findOccurrences()",
+                            "Occurrences found in file: " + inputFilePath.getAbsolutePath() + " for string: " + searchString,
+                            ReplaceStringInFiles.LogType.INFO
+                    );
+
+                    return new TextSearchResult(new Line[]{}, new File(inputFilePath.getAbsolutePath()));
+                }
+            } else {
+                logData(
+                        "findOccurrences()",
+                        "Searching in provided string for: " + searchString,
+                        ReplaceStringInFiles.LogType.INFO
+                );
+                // If initialized with a string, check if the string contains the search string
+                boolean isMatchExits = inputString.contains(searchString);
+                if (!isMatchExits) {
+                    logData(
+                            "findOccurrences()",
+                            "No occurrences found in provided string for: " + searchString,
+                            ReplaceStringInFiles.LogType.INFO
+                    );
+                    return null; // Return null if no occurrences found
+                } else {
+                    logData(
+                            "findOccurrences()",
+                            "Occurrences found in provided string for: " + searchString,
+                            ReplaceStringInFiles.LogType.INFO
+                    );
+                    return new TextSearchResult(new Line[]{}, new File("")); // Return empty file path if initialized with string
+                }
+            }
+        } else {
+
+            // create a ArrayList to hold the search results
+            java.util.List<Line> searchResults = new ArrayList<>();
+
+            // if this class initialized
+            if (isInitilizedWithFile) {
+                // log the start of the search if logging is enabled
+                logData(
+                        "findOccurrences()",
+                        "Starting search in file: " + inputFilePath.getAbsolutePath() + " for string: " + searchString,
+                        ReplaceStringInFiles.LogType.INFO
+                );
+
+                // read the file line by line
+                try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(inputFilePath))) {
+                    String line;
+                    int lineNumber = 1; // Start line number from 1
+                    while ((line = reader.readLine()) != null) {
+                        // find occurrences in the current line
+                        Line[] occurrences = findAndReturnOccurrence(line, searchString, lineNumber);
+                        if (occurrences != null) {
+
+                            // log the occurrences if logging is enabled
+                            logData(
+                                    "findOccurrences()",
+                                    "Found occurrences in line " + lineNumber + ": " + Arrays.toString(occurrences),
+                                    ReplaceStringInFiles.LogType.INFO
+                            );
+
+                            searchResults.addAll(Arrays.asList(occurrences)); // Add found occurrences to the list
+                        }
+                        lineNumber++; // Increment line number
+                    }
+                }
+            } else {
+
+                // log the start of the search if logging is enabled
+                logData(
+                        "findOccurrences()",
+                        "Starting search in string for: " + searchString,
+                        ReplaceStringInFiles.LogType.INFO
+                );
+                // If initialized with a string, split it into lines and search each line
+                String[] lines = inputString.split("\n");
+                for (int i = 0; i < lines.length; i++) {
+                    Line[] occurrences = findAndReturnOccurrence(lines[i], searchString, i + 1); // Line numbers start from 1
                     if (occurrences != null) {
 
                         // log the occurrences if logging is enabled
                         logData(
                                 "findOccurrences()",
-                                "Found occurrences in line " + lineNumber + ": " + Arrays.toString(occurrences),
+                                "Found occurrences in line " + (i + 1) + ": " + Arrays.toString(occurrences),
                                 ReplaceStringInFiles.LogType.INFO
                         );
 
                         searchResults.addAll(Arrays.asList(occurrences)); // Add found occurrences to the list
                     }
-                    lineNumber++; // Increment line number
                 }
             }
-        } else {
+            // If no occurrences were found, return an empty TextSearchResult
+            if (searchResults.isEmpty()) {
 
-            // log the start of the search if logging is enabled
-            logData(
-                    "findOccurrences()",
-                    "Starting search in string for: " + searchString,
-                    ReplaceStringInFiles.LogType.INFO
-            );
-            // If initialized with a string, split it into lines and search each line
-            String[] lines = inputString.split("\n");
-            for (int i = 0; i < lines.length; i++) {
-                Line[] occurrences = findAndReturnOccurrence(lines[i], searchString, i + 1); // Line numbers start from 1
-                if (occurrences != null) {
+                logData(
+                        "findOccurrences()",
+                        "No occurrences found for search string: " + searchString + " in " + (isInitilizedWithFile ? inputFilePath.getAbsolutePath() : "the provided string"),
+                        ReplaceStringInFiles.LogType.INFO
+                );
 
-                    // log the occurrences if logging is enabled
-                    logData(
-                            "findOccurrences()",
-                            "Found occurrences in line " + (i + 1) + ": " + Arrays.toString(occurrences),
-                            ReplaceStringInFiles.LogType.INFO
-                    );
-
-                    searchResults.addAll(Arrays.asList(occurrences)); // Add found occurrences to the list
-                }
+                return null; // Return null if no occurrences were found
             }
-        }
-        // If no occurrences were found, return an empty TextSearchResult
-        if (searchResults.isEmpty()) {
+            // Convert the list of search results to an array
+            Line[] resultArray = searchResults.toArray(new Line[0]);
 
+            // log processing completion if logging is enabled
             logData(
                     "findOccurrences()",
-                    "No occurrences found for search string: " + searchString + " in " + (isInitilizedWithFile ? inputFilePath.getAbsolutePath() : "the provided string"),
+                    "Search completed. Total occurrences found: " + resultArray.length,
                     ReplaceStringInFiles.LogType.INFO
             );
-
-            return null; // Return null if no occurrences were found
+            // Return a TextSearchResult object containing the search results and the file path (if applicable)
+            return new javadev.stringcollections.textreplacor.object.TextSearchResult(resultArray, inputFilePath != null ? inputFilePath : new File(""));
         }
-        // Convert the list of search results to an array
-        Line[] resultArray = searchResults.toArray(new Line[0]);
-
-        // log processing completion if logging is enabled
-        logData(
-                "findOccurrences()",
-                "Search completed. Total occurrences found: " + resultArray.length,
-                ReplaceStringInFiles.LogType.INFO
-        );
-        // Return a TextSearchResult object containing the search results and the file path (if applicable)
-        return new javadev.stringcollections.textreplacor.object.TextSearchResult(resultArray, inputFilePath != null ? inputFilePath : new File(""));
 
     }
+
 
     // logger method to log when useLogging is true
     public void logData(String methodName, String message, ReplaceStringInFiles.LogType logType) {
