@@ -18,7 +18,7 @@ import java.util.List;
 public class TextSearchResultSaverTest {
 
     /**
-     * Test {@link TextSearchResultSaver#getJsonStructure(List, String)} method to test generated json structure.
+     * Test {@link TextSearchResultSaver#getJsonStructure(List, String, String)}
      */
     @Test
     public void testGetJsonStructure() {
@@ -35,7 +35,7 @@ public class TextSearchResultSaverTest {
         results1.add(result1);
         results1.add(result2);
         // Call the method to get the JSON structure
-        String jsonStructure = TextSearchResultSaver.getJsonStructure(results1, "C:/projects/my-root-dir");
+        String jsonStructure = TextSearchResultSaver.getJsonStructure(results1, "C:/projects/my-root-dir", "test");
 
         // Assert that the JSON structure is not null or empty
         assert !jsonStructure.isEmpty() : "Expected non-empty JSON structure";
@@ -45,7 +45,7 @@ public class TextSearchResultSaverTest {
     }
 
     /**
-     * Test {@link TextSearchResultSaver#saveResultsToJsonFile(List, String, String)} (List, String)} method to test saving results to a file.
+     * Test {@link TextSearchResultSaver#getJsonStructure(List, String, String)}
      */
     @Test
     public void testSaveToFile() {
