@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * @author nurujjamanpollob
@@ -79,60 +80,113 @@ public class StringMatcherInFiles {
      * @return a list of TextSearchResult objects containing the search results. Null if not match found!
      * @throws IOException if an I/O error occurs while reading the files
      */
-    public @Nullable List<TextSearchResult> search() throws IOException {
+//    public @Nullable List<TextSearchResult> search() throws IOException {
+//
+//        // basic test: if user passed null or empty path or a file path? throw an exception
+//        validateArguments();
+//
+//        List<TextSearchResult> textSearchResults = new ArrayList<>();
+//
+//        DirectoryReader directoryReader = new DirectoryReader(directoryPath);
+//
+//        List<File> files = directoryReader.listAllFiles();
+//
+//        // log
+//        logData("search", "Searching for '" + searchString + "' in directory: " + directoryPath, ReplaceStringInFiles.LogType.INFO);
+//        // show how many files found
+//        logData("search", "Found " + files.size() + " files in directory: " + directoryPath, ReplaceStringInFiles.LogType.INFO);
+//
+//        for (File file : files) {
+//            if (isTextFile(file)) {
+//                // log
+//                logData("search", "Searching in file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.INFO);
+//
+//                FindOccurrencesInAString findOccurrencesInAString = new FindOccurrencesInAString(file, searchString);
+//                findOccurrencesInAString.setIncludeTextWhereMatched(includeTextWhereMatched);
+//                findOccurrencesInAString.setSkipLineCollection(skipLineCollection);
+//
+//                TextSearchResult textSearchResult = findOccurrencesInAString.findOccurrences();
+//
+//                if(!skipLineCollection) {
+//                    // if object is not null and result is not empty, add to results
+//                    if (textSearchResult != null && textSearchResult.lines().length > 0) {
+//                        // log
+//                        logData("search", "Found " + textSearchResult.lines().length + " occurrences in file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.INFO);
+//                        // log the text search result by toString() method
+//                        logData("search", "TextSearchResult: " + textSearchResult, ReplaceStringInFiles.LogType.INFO);
+//                        textSearchResults.add(textSearchResult);
+//                    }
+//                } else {
+//                    // if skipLineCollection is true, we only care about the file and not the lines
+//                    if (textSearchResult != null) {
+//                        // log
+//                        logData("search", "Found occurrences in file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.INFO);
+//                        textSearchResults.add(textSearchResult);
+//                    }
+//                }
+//
+//            }
+//        }
+//        // if no results found, return null
+//        if (textSearchResults.isEmpty()) {
+//            logData("search", "No occurrences found for '" + searchString + "' in directory: " + directoryPath, ReplaceStringInFiles.LogType.INFO);
+//            return null;
+//        }
+//
+//        return textSearchResults;
+//    }
 
-        // basic test: if user passed null or empty path or a file path? throw an exception
+    public @Nullable List<TextSearchResult> search() throws IOException {
         validateArguments();
 
-        List<TextSearchResult> textSearchResults = new ArrayList<>();
-
         DirectoryReader directoryReader = new DirectoryReader(directoryPath);
-
         List<File> files = directoryReader.listAllFiles();
 
-        // log
-        logData("search", "Searching for '" + searchString + "' in directory: " + directoryPath, ReplaceStringInFiles.LogType.INFO);
-        // show how many files found
-        logData("search", "Found " + files.size() + " files in directory: " + directoryPath, ReplaceStringInFiles.LogType.INFO);
+        int availableCores = Runtime.getRuntime().availableProcessors();
+        int threadCount = Math.max(2, availableCores * 5); // Use at least 2 threads, or 5 times the number of available cores
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        ConcurrentLinkedQueue<TextSearchResult> results = new ConcurrentLinkedQueue<>();
 
+        List<Future<?>> futures = new ArrayList<>();
         for (File file : files) {
             if (isTextFile(file)) {
-                // log
-                logData("search", "Searching in file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.INFO);
-
-                FindOccurrencesInAString findOccurrencesInAString = new FindOccurrencesInAString(file, searchString);
-                findOccurrencesInAString.setIncludeTextWhereMatched(includeTextWhereMatched);
-                findOccurrencesInAString.setSkipLineCollection(skipLineCollection);
-
-                TextSearchResult textSearchResult = findOccurrencesInAString.findOccurrences();
-
-                if(!skipLineCollection) {
-                    // if object is not null and result is not empty, add to results
-                    if (textSearchResult != null && textSearchResult.lines().length > 0) {
-                        // log
-                        logData("search", "Found " + textSearchResult.lines().length + " occurrences in file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.INFO);
-                        // log the text search result by toString() method
-                        logData("search", "TextSearchResult: " + textSearchResult, ReplaceStringInFiles.LogType.INFO);
-                        textSearchResults.add(textSearchResult);
+                futures.add(executor.submit(() -> {
+                    FindOccurrencesInAString finder = new FindOccurrencesInAString(file, searchString);
+                    finder.setIncludeTextWhereMatched(includeTextWhereMatched);
+                    finder.setSkipLineCollection(skipLineCollection);
+                    TextSearchResult result;
+                    try {
+                        result = finder.findOccurrences();
+                        if (result != null && (skipLineCollection || result.lines().length > 0)) {
+                            results.add(result);
+                        }
+                    } catch (IOException e) {
+                        logData("search", "Error searching file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.ERROR);
+                        // throw IOException to indicate failure
+                        throw new RuntimeException("Error searching file: " + file.getAbsolutePath(), e);
                     }
-                } else {
-                    // if skipLineCollection is true, we only care about the file and not the lines
-                    if (textSearchResult != null) {
-                        // log
-                        logData("search", "Found occurrences in file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.INFO);
-                        textSearchResults.add(textSearchResult);
-                    }
-                }
-
+                }));
             }
         }
-        // if no results found, return null
-        if (textSearchResults.isEmpty()) {
+
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+            // log the error
+                logData("search", "Thread interrupted or failed: " + e.getMessage(), ReplaceStringInFiles.LogType.ERROR);
+
+                // throw IOException to indicate failure
+                throw new IOException("Error occurred while searching files: " + e.getMessage(), e);
+            }
+        }
+        executor.shutdown();
+
+        if (results.isEmpty()) {
             logData("search", "No occurrences found for '" + searchString + "' in directory: " + directoryPath, ReplaceStringInFiles.LogType.INFO);
             return null;
         }
-
-        return textSearchResults;
+        return new ArrayList<>(results);
     }
 
     /**
