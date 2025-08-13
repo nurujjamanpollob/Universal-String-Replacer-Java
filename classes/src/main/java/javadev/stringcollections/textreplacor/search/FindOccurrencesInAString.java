@@ -158,10 +158,25 @@ public class FindOccurrencesInAString {
                         "Reading file: " + inputFilePath.getAbsolutePath() + " for string: " + searchString,
                         ReplaceStringInFiles.LogType.INFO
                 );
-                // read the file and find occurrences
-                String content = new String(java.nio.file.Files.readAllBytes(inputFilePath.toPath()));
-
-                boolean isMatchExits = content.contains(searchString);
+                // create bufferedReader to read the file, we only match first match, so whole file reading is not needed, we can improve reading performance by skipping unnecessary lines reading
+                boolean isMatchExits = false; // Flag to check if any match exists
+                try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(inputFilePath))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        // Check if the line contains the search string
+                        if (line.contains(searchString)) {
+                            isMatchExits = true; // Set the flag to true if a match is found
+                            break; // Exit the loop if a match is found
+                        }
+                    }
+                } catch (IOException e) {
+                    logData(
+                            "findOccurrences()",
+                            "Error reading file: " + inputFilePath.getAbsolutePath() + " - " + e.getMessage(),
+                            ReplaceStringInFiles.LogType.ERROR
+                    );
+                    throw e; // Rethrow the exception to indicate an error occurred
+                }
                 if (!isMatchExits) {
                     logData(
                             "findOccurrences()",
