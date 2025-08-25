@@ -76,7 +76,7 @@ public class TextOccurrenceFinder {
         // include the occurrences where the text is matched
         stringMatcherInFiles.setIncludeTextWhereMatched(true);
         stringMatcherInFiles.setUseLogging(false);
-        stringMatcherInFiles.setSkipLineCollection(true);
+        stringMatcherInFiles.setSkipLineCollection(false);
 
         // find occurrences in the files
         List<TextSearchResult> results = stringMatcherInFiles.search();
