@@ -297,6 +297,7 @@
 
 package javadev.stringcollections.textreplacor.io;
 
+import javadev.stringcollections.textreplacor.console.ColoredConsoleOutput;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -419,5 +420,80 @@ public class DirectoryReader {
             }
         }
         return false;
+    }
+
+    /**
+     * Method taht used to list all files and directories from a directory recursively, while ignoring a list of directories will be ignored.
+     * For example this directory structure:
+     * <pre>
+     *     /dir1
+     *     /subdir1
+     *     /.git
+     *     /.git/config
+     *     /subdir2>file.txt
+     *     /dir2>subdir3>subdir4>file2.txt
+     * </pre>
+     * <p>
+     * If we ignore .git directory, then the result will be:
+     * <pre>
+     *     /dir1
+     *     /subdir1
+     *     /subdir2>file.txt
+     *     /dir2>subdir3>subdir4>file2.txt
+     * </pre>
+     * <p>
+     * <p>
+     * Note: This method does not filter files by extensions. If you want to filter files by extensions, use {@link #listAllFilesAndDirectories(Boolean, String...)} method.
+     * @param directoriesToIgnore List of directory names to ignore (e.g., ".git", "node_modules").
+     * @return An array of `File` objects, excluding files in the ignored directories.
+     */
+    public List<File> listAllFilesAndDirectoriesIgnoring(List<String> directoriesToIgnore) {
+        List<File> allFiles = new ArrayList<>();
+        collectFilesRecursivelyIgnoring(new File(directoryPath), allFiles, directoriesToIgnore);
+        return allFiles;
+    }
+
+    /**
+     * Recursively traverses directories and collects files, ignoring specified directory names.
+     *
+     * @param directory           The directory to start traversal from.
+     * @param collectedFiles      The list to add collected files to.
+     * @param directoriesToIgnore A list of directory names to ignore.
+     */
+    /**
+     * Recursively traverses directories and collects files, ignoring specified directory names.
+     *
+     * @param directory           The directory to start traversal from.
+     * @param collectedFiles      The list to add collected files to.
+     * @param directoriesToIgnore A list of directory names to ignore.
+     */
+    private void collectFilesRecursivelyIgnoring(@NotNull File directory, @NotNull List<File> collectedFiles, @Nullable List<String> directoriesToIgnore) {
+        if (!directory.isDirectory()) {
+            return;
+        }
+
+        File[] files = directory.listFiles();
+        if (files == null) {
+            return;
+        }
+
+        for (File file : files) {
+            if (checkReadWrite && (!file.canRead() || !file.canWrite())) {
+                continue;
+            }
+
+            if (file.isDirectory()) {
+                // If the directory is in the ignore list, skip it entirely.
+                if (directoriesToIgnore != null && directoriesToIgnore.contains(file.getName())) {
+                    continue;
+                }
+                // Add the directory and recurse into it.
+                collectedFiles.add(file);
+                collectFilesRecursivelyIgnoring(file, collectedFiles, directoriesToIgnore);
+            } else {
+                // It's a file, so add it to the list.
+                collectedFiles.add(file);
+            }
+        }
     }
 }
