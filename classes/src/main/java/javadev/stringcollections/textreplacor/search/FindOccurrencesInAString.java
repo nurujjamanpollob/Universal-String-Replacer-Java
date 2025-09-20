@@ -48,6 +48,13 @@ public class FindOccurrencesInAString {
     private boolean skipLineCollection = false; // If true, the line collection will be skipped. Default is false.
 
     /**
+     * -- SETTER --
+     * @param caseSensitive if true, the search will be case-sensitive. Default is true.
+     */
+    @Setter
+    private boolean caseSensitive = false;
+
+    /**
      * /**
      * Constructor to initialize the input string and search string.
      *
@@ -91,6 +98,45 @@ public class FindOccurrencesInAString {
      * @param lineNumber   the line number in the text. the line number will be incremented by 1 because array index starts from 0!
      * @return a {@link javadev.stringcollections.textreplacor.object.Line} array of found occurrences, or null if no occurrences are found.
      */
+//    public @Nullable Line[] findAndReturnOccurrence(@NotNull String buffer, @NotNull String searchString, int lineNumber) {
+//        // run loop and find occurrences of searchString in buffer
+//        if (searchString.isEmpty()) {
+//
+//            return null; // Return null if input is invalid
+//        }
+//
+//        Line[] occurrences = new Line[buffer.length()]; // Initialize an array to hold occurrences
+//
+//        int occurrenceCount = 0; // Counter for occurrences found
+//        int index = buffer.indexOf(searchString); // Find the first occurrence of searchString
+//        while (index != -1) {
+//
+//            Line occurrence = includeTextWhereMatched ? new Line(lineNumber, buffer, index, index + searchString.length() - 1) : new Line(lineNumber, "", index, index + searchString.length() - 1);
+//
+//            // log all object by toString() method
+//            logData(
+//                    "findAndReturnOccurrence()",
+//                    "Found occurrence: " + occurrence,
+//                    ReplaceStringInFiles.LogType.INFO
+//            );
+//            // Create a Line object for the found occurrence
+//            occurrences[occurrenceCount] = occurrence;
+//            occurrenceCount++; // Increment the count of occurrences
+//
+//            // Find the next occurrence of searchString in buffer
+//            index = buffer.indexOf(searchString, index + searchString.length());
+//        }
+//        // If no occurrences were found, return null
+//        if (occurrenceCount == 0) {
+//            return null;
+//        }
+//        // Create a new array with the exact number of occurrences found
+//        Line[] result = new Line[occurrenceCount];
+//        System.arraycopy(occurrences, 0, result, 0, occurrenceCount); // Copy the found occurrences to the result array
+//        return result; // Return the array of found occurrences
+//
+//    }
+
     public @Nullable Line[] findAndReturnOccurrence(@NotNull String buffer, @NotNull String searchString, int lineNumber) {
         // run loop and find occurrences of searchString in buffer
         if (searchString.isEmpty()) {
@@ -98,10 +144,14 @@ public class FindOccurrencesInAString {
             return null; // Return null if input is invalid
         }
 
+        String searchBuffer = caseSensitive ? buffer : buffer.toLowerCase();
+        String searchTarget = caseSensitive ? searchString : searchString.toLowerCase();
+
+
         Line[] occurrences = new Line[buffer.length()]; // Initialize an array to hold occurrences
 
         int occurrenceCount = 0; // Counter for occurrences found
-        int index = buffer.indexOf(searchString); // Find the first occurrence of searchString
+        int index = searchBuffer.indexOf(searchTarget); // Find the first occurrence of searchString
         while (index != -1) {
 
             Line occurrence = includeTextWhereMatched ? new Line(lineNumber, buffer, index, index + searchString.length() - 1) : new Line(lineNumber, "", index, index + searchString.length() - 1);
@@ -117,7 +167,7 @@ public class FindOccurrencesInAString {
             occurrenceCount++; // Increment the count of occurrences
 
             // Find the next occurrence of searchString in buffer
-            index = buffer.indexOf(searchString, index + searchString.length());
+            index = searchBuffer.indexOf(searchTarget, index + searchString.length());
         }
         // If no occurrences were found, return null
         if (occurrenceCount == 0) {
@@ -142,6 +192,168 @@ public class FindOccurrencesInAString {
      * If skipLineCollection is false, it will perform the search line by line and return a TextSearchResult object containing the found occurrences.
      * @throws IOException if an I/O error occurs while reading the file.
      */
+//    public @Nullable TextSearchResult findOccurrences() throws IOException {
+//
+//        // if no line collection is needed, We will skip the line collection
+//        if (skipLineCollection) {
+//            logData(
+//                    "findOccurrences()",
+//                    "Skipping line collection as skipLineCollection is set to true.",
+//                    ReplaceStringInFiles.LogType.INFO
+//            );
+//            // we read the file, if no occurrences found, return null
+//            if (isInitilizedWithFile) {
+//                logData(
+//                        "findOccurrences()",
+//                        "Reading file: " + inputFilePath.getAbsolutePath() + " for string: " + searchString,
+//                        ReplaceStringInFiles.LogType.INFO
+//                );
+//                // create bufferedReader to read the file, we only match first match, so whole file reading is not needed, we can improve reading performance by skipping unnecessary lines reading
+//                boolean isMatchExits = false; // Flag to check if any match exists
+//                try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(inputFilePath))) {
+//                    String line;
+//                    while ((line = reader.readLine()) != null) {
+//                        // Check if the line contains the search string
+//                        if (line.contains(searchString)) {
+//                            isMatchExits = true; // Set the flag to true if a match is found
+//                            break; // Exit the loop if a match is found
+//                        }
+//                    }
+//                } catch (IOException e) {
+//                    logData(
+//                            "findOccurrences()",
+//                            "Error reading file: " + inputFilePath.getAbsolutePath() + " - " + e.getMessage(),
+//                            ReplaceStringInFiles.LogType.ERROR
+//                    );
+//                    throw e; // Rethrow the exception to indicate an error occurred
+//                }
+//                if (!isMatchExits) {
+//                    logData(
+//                            "findOccurrences()",
+//                            "No occurrences found in file: " + inputFilePath.getAbsolutePath() + " " +
+//                                    "for string: " + searchString,
+//                            ReplaceStringInFiles.LogType.INFO
+//                    );
+//                    return null; // Return null if no occurrences found
+//                } else {
+//                    logData(
+//                            "findOccurrences()",
+//                            "Occurrences found in file: " + inputFilePath.getAbsolutePath() + " for string: " + searchString,
+//                            ReplaceStringInFiles.LogType.INFO
+//                    );
+//
+//                    return new TextSearchResult(new Line[]{}, new File(inputFilePath.getAbsolutePath()));
+//                }
+//            } else {
+//                logData(
+//                        "findOccurrences()",
+//                        "Searching in provided string for: " + searchString,
+//                        ReplaceStringInFiles.LogType.INFO
+//                );
+//                // If initialized with a string, check if the string contains the search string
+//                boolean isMatchExits = inputString.contains(searchString);
+//                if (!isMatchExits) {
+//                    logData(
+//                            "findOccurrences()",
+//                            "No occurrences found in provided string for: " + searchString,
+//                            ReplaceStringInFiles.LogType.INFO
+//                    );
+//                    return null; // Return null if no occurrences found
+//                } else {
+//                    logData(
+//                            "findOccurrences()",
+//                            "Occurrences found in provided string for: " + searchString,
+//                            ReplaceStringInFiles.LogType.INFO
+//                    );
+//                    return new TextSearchResult(new Line[]{}, new File("")); // Return empty file path if initialized with string
+//                }
+//            }
+//        } else {
+//
+//            // create a ArrayList to hold the search results
+//            java.util.List<Line> searchResults = new ArrayList<>();
+//
+//            // if this class initialized
+//            if (isInitilizedWithFile) {
+//                // log the start of the search if logging is enabled
+//                logData(
+//                        "findOccurrences()",
+//                        "Starting search in file: " + inputFilePath.getAbsolutePath() + " for string: " + searchString,
+//                        ReplaceStringInFiles.LogType.INFO
+//                );
+//
+//                // read the file line by line
+//                try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(inputFilePath))) {
+//                    String line;
+//                    int lineNumber = 1; // Start line number from 1
+//                    while ((line = reader.readLine()) != null) {
+//                        // find occurrences in the current line
+//                        Line[] occurrences = findAndReturnOccurrence(line, searchString, lineNumber);
+//                        if (occurrences != null) {
+//
+//                            // log the occurrences if logging is enabled
+//                            logData(
+//                                    "findOccurrences()",
+//                                    "Found occurrences in line " + lineNumber + ": " + Arrays.toString(occurrences),
+//                                    ReplaceStringInFiles.LogType.INFO
+//                            );
+//
+//                            searchResults.addAll(Arrays.asList(occurrences)); // Add found occurrences to the list
+//                        }
+//                        lineNumber++; // Increment line number
+//                    }
+//                }
+//            } else {
+//
+//                // log the start of the search if logging is enabled
+//                logData(
+//                        "findOccurrences()",
+//                        "Starting search in string for: " + searchString,
+//                        ReplaceStringInFiles.LogType.INFO
+//                );
+//                // If initialized with a string, split it into lines and search each line
+//                String[] lines = inputString.split("\n");
+//                for (int i = 0; i < lines.length; i++) {
+//                    Line[] occurrences = findAndReturnOccurrence(lines[i], searchString, i + 1); // Line numbers start from 1
+//                    if (occurrences != null) {
+//
+//                        // log the occurrences if logging is enabled
+//                        logData(
+//                                "findOccurrences()",
+//                                "Found occurrences in line " + (i + 1) + ": " + Arrays.toString(occurrences),
+//                                ReplaceStringInFiles.LogType.INFO
+//                        );
+//
+//                        searchResults.addAll(Arrays.asList(occurrences)); // Add found occurrences to the list
+//                    }
+//                }
+//            }
+//            // If no occurrences were found, return an empty TextSearchResult
+//            if (searchResults.isEmpty()) {
+//
+//                logData(
+//                        "findOccurrences()",
+//                        "No occurrences found for search string: " + searchString + " in " + (isInitilizedWithFile ? inputFilePath.getAbsolutePath() : "the provided string"),
+//                        ReplaceStringInFiles.LogType.INFO
+//                );
+//
+//                return null; // Return null if no occurrences were found
+//            }
+//            // Convert the list of search results to an array
+//            Line[] resultArray = searchResults.toArray(new Line[0]);
+//
+//            // log processing completion if logging is enabled
+//            logData(
+//                    "findOccurrences()",
+//                    "Search completed. Total occurrences found: " + resultArray.length,
+//                    ReplaceStringInFiles.LogType.INFO
+//            );
+//            // Return a TextSearchResult object containing the search results and the file path (if applicable)
+//            return new javadev.stringcollections.textreplacor.object.TextSearchResult(resultArray, inputFilePath != null ? inputFilePath : new File(""));
+//        }
+//
+//    }
+
     public @Nullable TextSearchResult findOccurrences() throws IOException {
 
         // if no line collection is needed, We will skip the line collection
@@ -164,7 +376,9 @@ public class FindOccurrencesInAString {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         // Check if the line contains the search string
-                        if (line.contains(searchString)) {
+                        String lineToSearch = caseSensitive ? line : line.toLowerCase();
+                        String stringToFind = caseSensitive ? searchString : searchString.toLowerCase();
+                        if (lineToSearch.contains(stringToFind)) {
                             isMatchExits = true; // Set the flag to true if a match is found
                             break; // Exit the loop if a match is found
                         }
@@ -201,7 +415,9 @@ public class FindOccurrencesInAString {
                         ReplaceStringInFiles.LogType.INFO
                 );
                 // If initialized with a string, check if the string contains the search string
-                boolean isMatchExits = inputString.contains(searchString);
+                String stringToSearch = caseSensitive ? inputString : inputString.toLowerCase();
+                String stringToFind = caseSensitive ? searchString : searchString.toLowerCase();
+                boolean isMatchExits = stringToSearch.contains(stringToFind);
                 if (!isMatchExits) {
                     logData(
                             "findOccurrences()",
