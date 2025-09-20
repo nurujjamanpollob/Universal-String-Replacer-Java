@@ -369,6 +369,28 @@ public class DirectoryReader {
     }
 
     /**
+     * List All files, while ignoring a list of directories
+     * @param directoriesToIgnore List of directory names to ignore (e.g., ".git", "node_modules").
+     * @param fileExtensions A varargs array of file extensions to include (e.g., ".txt", ".java"). If null or empty, all files are considered.
+     */
+    public List<File> listAllFilesIgnoring(List<String> directoriesToIgnore, String... fileExtensions) {
+        List<File> allFiles = new ArrayList<>();
+        List<String> extensions = (fileExtensions != null) ? Arrays.asList(fileExtensions) : null;
+        collectFilesRecursivelyIgnoring(new File(directoryPath), allFiles, directoriesToIgnore);
+        if (extensions == null || extensions.isEmpty()) {
+            return allFiles;
+        }
+        // Filter files by extensions
+        List<File> filteredFiles = new ArrayList<>();
+        for (File file : allFiles) {
+            if (!file.isDirectory() && matchesExtension(file.getName(), extensions)) {
+                filteredFiles.add(file);
+            }
+        }
+        return filteredFiles;
+    }
+
+    /**
      * Recursively traverses directories and collects files based on specified criteria.
      *
      * @param directory          The directory to start traversal from.
