@@ -369,25 +369,49 @@ public class DirectoryReader {
     }
 
     /**
-     * List All files, while ignoring a list of directories
+     * List All files, while ignoring a list of directories, works in the same way as {@link #listAllFiles()} method, but provide an option to ignore a list of directories for file list
      * @param directoriesToIgnore List of directory names to ignore (e.g., ".git", "node_modules").
-     * @param fileExtensions A varargs array of file extensions to include (e.g., ".txt", ".java"). If null or empty, all files are considered.
      */
-    public List<File> listAllFilesIgnoring(List<String> directoriesToIgnore, String... fileExtensions) {
-        List<File> allFiles = new ArrayList<>();
-        List<String> extensions = (fileExtensions != null) ? Arrays.asList(fileExtensions) : null;
-        collectFilesRecursivelyIgnoring(new File(directoryPath), allFiles, directoriesToIgnore);
-        if (extensions == null || extensions.isEmpty()) {
-            return allFiles;
+    public List<File> listAllFilesIgnoring(List<String> directoriesToIgnore) {
+        List<File> fileList = new ArrayList<>();
+        collectFilesRecursivelyIgnoring(new File(directoryPath), fileList, directoriesToIgnore);
+        return fileList;
+    }
+
+    /**
+     * Recursively traverses directories and collects files, ignoring specified directory names.
+     * This method only collects files, not directories.
+     *
+     * @param directory           The directory to start traversal from.
+     * @param collectedFiles      The list to add collected files to.
+     * @param directoriesToIgnore A list of directory names to ignore.
+     */
+    private void collectFilesRecursivelyIgnoring(@NotNull File directory, @NotNull List<File> collectedFiles, @Nullable List<String> directoriesToIgnore) {
+        if (!directory.isDirectory()) {
+            return;
         }
-        // Filter files by extensions
-        List<File> filteredFiles = new ArrayList<>();
-        for (File file : allFiles) {
-            if (!file.isDirectory() && matchesExtension(file.getName(), extensions)) {
-                filteredFiles.add(file);
+
+        // If the current directory is in the ignore list, do not traverse it.
+        if (directoriesToIgnore != null && directoriesToIgnore.contains(directory.getName())) {
+            return;
+        }
+
+        File[] files = directory.listFiles();
+        if (files == null) {
+            return;
+        }
+
+        for (File file : files) {
+            if (checkReadWrite && (!file.canRead() || !file.canWrite())) {
+                continue;
+            }
+
+            if (file.isDirectory()) {
+                collectFilesRecursivelyIgnoring(file, collectedFiles, directoriesToIgnore);
+            } else { // It's a file
+                collectedFiles.add(file);
             }
         }
-        return filteredFiles;
     }
 
     /**
@@ -471,12 +495,12 @@ public class DirectoryReader {
      */
     public List<File> listAllFilesAndDirectoriesIgnoring(List<String> directoriesToIgnore) {
         List<File> allFiles = new ArrayList<>();
-        collectFilesRecursivelyIgnoring(new File(directoryPath), allFiles, directoriesToIgnore);
+        collectFilesAndDirectoryRecursivelyIgnoring(new File(directoryPath), allFiles, directoriesToIgnore);
         return allFiles;
     }
 
     /**
-     * Recursively traverses directories and collects files, ignoring specified directory names.
+     * Recursively traverses directories and collects files and directories, ignoring specified directory names.
      *
      * @param directory           The directory to start traversal from.
      * @param collectedFiles      The list to add collected files to.
@@ -489,7 +513,7 @@ public class DirectoryReader {
      * @param collectedFiles      The list to add collected files to.
      * @param directoriesToIgnore A list of directory names to ignore.
      */
-    private void collectFilesRecursivelyIgnoring(@NotNull File directory, @NotNull List<File> collectedFiles, @Nullable List<String> directoriesToIgnore) {
+    private void collectFilesAndDirectoryRecursivelyIgnoring(@NotNull File directory, @NotNull List<File> collectedFiles, @Nullable List<String> directoriesToIgnore) {
         if (!directory.isDirectory()) {
             return;
         }
@@ -511,7 +535,7 @@ public class DirectoryReader {
                 }
                 // Add the directory and recurse into it.
                 collectedFiles.add(file);
-                collectFilesRecursivelyIgnoring(file, collectedFiles, directoriesToIgnore);
+                collectFilesAndDirectoryRecursivelyIgnoring(file, collectedFiles, directoriesToIgnore);
             } else {
                 // It's a file, so add it to the list.
                 collectedFiles.add(file);
