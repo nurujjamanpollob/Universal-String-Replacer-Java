@@ -1,10 +1,12 @@
 package javadev.stringcollections.textreplacor.search;
 
 import javadev.stringcollections.textreplacor.ReplaceStringInFiles;
+import javadev.stringcollections.textreplacor.console.ColoredConsoleOutput;
 import javadev.stringcollections.textreplacor.filesquery.DirectoryReader;
+import javadev.stringcollections.textreplacor.io.TextSearchResultSaver;
+import javadev.stringcollections.textreplacor.mimedetector.TextFileDetector;
 import javadev.stringcollections.textreplacor.object.TextSearchResult;
 import javadev.stringcollections.textreplacor.writer.ReplaceStringInAFile;
-import librarycollections.nurujjamanpollob.mimedetector.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
@@ -13,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.*;
 
 /**
@@ -106,8 +109,11 @@ public class StringMatcherInFiles {
                         }
                     } catch (IOException e) {
                         logData("search", "Error searching file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.ERROR);
-                        // throw IOException to indicate failure
-                        throw new RuntimeException("Error searching file: " + file.getAbsolutePath(), e);
+                        e.printStackTrace();
+
+                        // shut down the executor service
+                        executor.shutdownNow();
+                        throw new RuntimeException("Error occurred while searching file: " + file.getAbsolutePath(), e);
                     }
                 }
             }));
@@ -121,6 +127,8 @@ public class StringMatcherInFiles {
             // log the error
                 logData("search", "Thread interrupted or failed: " + e.getMessage(), ReplaceStringInFiles.LogType.ERROR);
 
+                e.printStackTrace();
+
                 // throw IOException to indicate failure
                 throw new IOException("Error occurred while searching files: " + e.getMessage(), e);
             }
@@ -129,6 +137,7 @@ public class StringMatcherInFiles {
 
         if (results.isEmpty()) {
             logData("search", "No occurrences found for '" + searchString + "' in directory: " + directoryPath, ReplaceStringInFiles.LogType.INFO);
+            ColoredConsoleOutput.printRedText("No occurrences found for '" + searchString + "' in directory: " + directoryPath);
             return null;
         }
         return new ArrayList<>(results);
@@ -144,17 +153,15 @@ public class StringMatcherInFiles {
             return false; // Not a valid file or empty file
         }
 
-        MagicMatch match;
+        // analyze the file to get its MIME type
         try {
-            match = Magic.getMagicMatch(file, true, false);
-        } catch (MagicParseException | MagicMatchNotFoundException | MagicException e) {
-            // log error
-            ReplaceStringInAFile.logData(StringMatcherInFiles.class, "isTextFile", "Error detecting MIME type for file: " + file.getAbsolutePath(), ReplaceStringInFiles.LogType.ERROR);
-            e.printStackTrace();
-            return false;
-        }
+            return TextFileDetector.isTextFile(file.toPath());
+        } catch (IOException e) {
 
-        return match.getMimeType().contains("text");
+            // log the error
+            System.err.println("Error detecting MIME type for file " + file.getAbsolutePath() + ": " + e.getMessage());
+            return  false;
+        }
     }
 
     // this method validate passed arguments for error and throw IOException if any error found
@@ -186,6 +193,21 @@ public class StringMatcherInFiles {
         if (useLogging) {
             ReplaceStringInAFile.logData(this.getClass(), methodName, message, logType);
         }
+    }
+
+    public static void main(String[] args) throws IOException {
+
+        Scanner sc = new Scanner(System.in);
+
+        ColoredConsoleOutput.printRedText("Provide path where to search: ");
+
+        String path = sc.nextLine();
+
+        StringMatcherInFiles matcher = new StringMatcherInFiles(path, "Electric");
+
+        ColoredConsoleOutput.printGreenText("Starting process");
+
+        ColoredConsoleOutput.printBlueText(TextSearchResultSaver.getJsonStructure(matcher.search(), path, "Electric"));
     }
 
 }

@@ -3,6 +3,7 @@ package javadev.stringcollections.textreplacor;
 import javadev.stringcollections.textreplacor.console.ColoredConsoleOutput;
 import javadev.stringcollections.textreplacor.exception.TextReplacerError;
 import javadev.stringcollections.textreplacor.filesquery.DirectoryReader;
+import javadev.stringcollections.textreplacor.mimedetector.TextFileDetector;
 import javadev.stringcollections.textreplacor.writer.ReplaceStringInAFile;
 import librarycollections.nurujjamanpollob.mimedetector.MagicException;
 import librarycollections.nurujjamanpollob.mimedetector.MagicMatchNotFoundException;
@@ -10,6 +11,7 @@ import librarycollections.nurujjamanpollob.mimedetector.MagicParseException;
 import lombok.Setter;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 
@@ -347,26 +349,24 @@ public class ReplaceStringInFiles {
     }
 
     /**
-     * This method used to test it if the file is a text file or not.
-     * @param file file to test
-     * @return true if the file is a text file, otherwise false
+     * Returns true if a file is a text file based on its MIME type.
      */
-    public boolean isTextFile(File file) {
-        // get the mime type of the file
-        String mimeType;
+    public static boolean isTextFile(java.io.File file) {
+
+        // check if file size is not zero and object not null
+        if (file == null || !file.exists() || file.length() == 0) {
+            return false; // Not a valid file or empty file
+        }
+
+        // analyze the file to get its MIME type
         try {
-            mimeType = librarycollections.nurujjamanpollob.mimedetector.Magic.getMagicMatch(file, true, false).getMimeType();
-        } catch (MagicParseException | MagicMatchNotFoundException | MagicException e) {
-            return false;
-        }
+            return TextFileDetector.isTextFile(file.toPath());
+        } catch (IOException e) {
 
-        // if the mime type is null or empty
-        if (mimeType == null || mimeType.isEmpty()) {
-            return false;
+            // log the error
+            System.err.println("Error detecting MIME type for file " + file.getAbsolutePath() + ": " + e.getMessage());
+            return  false;
         }
-
-        // if the mime type contains text
-        return mimeType.contains("text");
     }
 
     public enum LogType {
